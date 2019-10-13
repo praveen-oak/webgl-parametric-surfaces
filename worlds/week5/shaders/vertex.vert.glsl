@@ -10,8 +10,8 @@ out vec3 vPos;
 out vec3 vNor;
 // interpolated cursor
 out vec3 vCursor;
-
 out vec2 vXY;
+// out int shape_index;
 
 // matrices
 uniform mat4 uModel;
