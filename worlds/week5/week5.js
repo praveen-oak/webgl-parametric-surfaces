@@ -393,9 +393,10 @@ function onDraw(t, projMat, viewMat, state, eyeIdx) {
     m.save();
     m.identity();
     m.translate(0,0,-6);
-    m.rotateZ(theta); 
-    m.rotateY(theta*0.5); 
-    m.scale(.3,.05,.05);
+    // m.rotateZ(theta*0.1); 
+    m.rotateX(theta*0.1); 
+    // m.rotateY(theta*0.5); 
+    m.scale(.3,1,.4);
     gl.uniform3fv(state.uColorLoc, state.color0 );
     gl.uniformMatrix4fv(state.uModelLoc, false, m.value() );
     gl.drawArrays(gl.TRIANGLES, 0, cubeVertices.length / VERTEX_SIZE);
