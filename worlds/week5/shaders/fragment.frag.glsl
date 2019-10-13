@@ -39,10 +39,11 @@ vec3 specular_light(vec3 lDir, int material_index, vec3 surface, vec3 w, vec3 su
 
 void main() {
     vec3 lDir  = vec3(.57,.57,.57);
-    vec3 w = normal(vPos - vec3(vXY, 0.));
-    uMaterials[0].specular = vec3(0.9,0.9,0.9);
+    vec3 w = normal(vec3(vPos.x, vPos.y, vPos.z));
+    uMaterials[0].specular = vec3(0.1,0.1,0.1);
     uMaterials[0].power = 6.;
-    vec3 shade = vec3(.1,.1,.1) + specular_light(lDir, 0, vPos, w, vNor);
+    vec3 shade = vec3(.5,.0,.0);
+    // shade = shade  + specular_light(lDir, 0, vPos, w, vNor);
     vec3 color = shade;
 
     // HIGHLIGHT CURSOR POSITION WHILE MOUSE IS PRESSED
