@@ -122,6 +122,7 @@ async function setup(state) {
                 state.material_index          = gl.getUniformLocation(program, 'material_index');
 
                 state.uMaterialsLoc = [];
+
                 state.uMaterialsLoc[0] = {};
                 state.uMaterialsLoc[0].diffuse              = gl.getUniformLocation(program, 'uMaterials[0].diffuse');
                 state.uMaterialsLoc[0].ambient              = gl.getUniformLocation(program, 'uMaterials[0].ambient');
@@ -309,8 +310,10 @@ function onStartFrame(t, state) {
 
     gl.uniform3fv(state.uCursorLoc, cursorValue());
 
-    gl.uniform1f(state.material_index, 2);
-    gl.uniform3fv(state.uMaterialsLoc[0].ambient , [.1,.0,.0]);
+    gl.uniform1i(state.material_index, 1);
+
+    //skin
+    gl.uniform3fv(state.uMaterialsLoc[0].ambient , [.3,.25,.05]);
     gl.uniform3fv(state.uMaterialsLoc[0].diffuse , [.7,.7,.7]);
     gl.uniform3fv(state.uMaterialsLoc[0].specular, [0.9,.9,.9]);
     gl.uniform1f(state.uMaterialsLoc[0].power   , 12);
@@ -318,6 +321,7 @@ function onStartFrame(t, state) {
     gl.uniform1f(state.uMaterialsLoc[0].refraction_factor   , .2);
     gl.uniform1f(state.uMaterialsLoc[0].index_of_refrac   , 1.1);
 
+    //shirt
     gl.uniform3fv(state.uMaterialsLoc[1].ambient , [.0,.1,.1]);
     gl.uniform3fv(state.uMaterialsLoc[1].diffuse , [0.,.4,.0]);
     gl.uniform3fv(state.uMaterialsLoc[1].specular, [0.5,.5,.5]);
@@ -326,7 +330,8 @@ function onStartFrame(t, state) {
     gl.uniform1f(state.uMaterialsLoc[1].refraction_factor   , .2);
     gl.uniform1f(state.uMaterialsLoc[1].index_of_refrac   , 1.8);
 
-    gl.uniform3fv(state.uMaterialsLoc[2].ambient , [.1,.0,.1]);
+    //shorts
+    gl.uniform3fv(state.uMaterialsLoc[2].ambient , [.128,.0,.0]);
     gl.uniform3fv(state.uMaterialsLoc[2].diffuse , [0.2,.0,.0]);
     gl.uniform3fv(state.uMaterialsLoc[2].specular, [0.5,.5,.2]);
     gl.uniform1f(state.uMaterialsLoc[2].power   , 20);
@@ -366,16 +371,19 @@ function onDraw(t, projMat, viewMat, state, eyeIdx) {
     //torso
     m.save();
       m.scale(0.15, 0.5, 0.1);
+      gl.uniform1i(state.material_index, 1);
       gl.uniform3fv(state.uColorLoc, state.color0 );
       gl.uniformMatrix4fv(state.uModelLoc, false, m.value() );
       gl.drawArrays(gl.TRIANGLES, 0, cubeVertices.length / VERTEX_SIZE);
     m.restore();
 
+    gl.uniform1i(state.material_index, 0);
 
     //face
     m.save();
       m.translate(0, 0.6, 0)
       m.scale(.09, .13, .01);
+
       gl.uniform3fv(state.uColorLoc, state.color0 );
       gl.uniformMatrix4fv(state.uModelLoc, false, m.value() );
       gl.drawArrays(gl.TRIANGLES, 0, cubeVertices.length / VERTEX_SIZE);
@@ -412,7 +420,16 @@ function onDraw(t, projMat, viewMat, state, eyeIdx) {
                  m.scale(.3,.05,.05);
                  gl.uniform3fv(state.uColorLoc, state.color0 );
                  gl.uniformMatrix4fv(state.uModelLoc, false, m.value() );
+                 //half sleeve shirt
+                 if(limb == 0){
+                  gl.uniform1i(state.material_index, 1); 
+                 }else{
+                  //shorts
+                  gl.uniform1i(state.material_index, 2); 
+                 }
+                 
                  gl.drawArrays(gl.TRIANGLES, 0, cubeVertices.length / VERTEX_SIZE);
+                 gl.uniform1i(state.material_index, 0);
                m.restore();
 
             m.restore();

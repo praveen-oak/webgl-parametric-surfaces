@@ -13,7 +13,7 @@ struct Material {
 
 const int NS = 3;
 uniform Material uMaterials[NS];
-uniform float material_index;
+uniform int material_index;
 
 uniform vec3  uColor;
 uniform vec3  uCursor; // CURSOR: xy=pos, z=mouse up/down
@@ -42,6 +42,8 @@ void main() {
     	
     float fl = -5.;
     vec3 w = normal(vec3(vXY.x, vXY.y, fl));
+    // vec3 temp = vec3(material_index, material_index, material_index);
+    // vec3 color = temp;
     vec3 color = uMaterials[material_index].ambient + specular_light(lDir, material_index, vPos, w, normal(vNor));
     fragColor = vec4(sqrt(color), 1.0);
 }
