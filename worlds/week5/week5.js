@@ -245,40 +245,6 @@ let translate = (x,y,z) => {
 };
 
 
-// function translate(matrix, x, y, z){
-//     let transformation_matrix = [1,0,0,0,  0,1,0,0,  0,0,1,0,  x,y,z,1];
-//     return multiply(transformation_matrix, matrix);
-// }
-
-// function rotateX(matrix, degrees){
-//     const radians = degrees * (180 / Math.PI);
-//     const cos = Math.cos(radians);
-//     const sin = Math.sin(radians);
-//     let transformation_matrix = [1,0,0,0,  0,cos,sin,0,  0,-1*sin,cos,0   ,0,0,0,1];
-//     // return matrix;
-//     return multiply(transformation_matrix, matrix);
-// }
-
-// function rotateY(matrix, degrees){
-//     const radians = degrees * (180 / Math.PI);
-//     const cos = Math.cos(radians);
-//     const sin = Math.sin(radians);
-//     let transformation_matrix = [cos,0,-1*sin,0,  0,1,0,0,  sin,0,cos,0,  0,0,0,1];
-//     return multiply(transformation_matrix, matrix);
-// }
-
-// function rotateZ(matrix, degrees){
-//     const radians = degrees * (180 / Math.PI);
-//     const cos = Math.cos(radians);
-//     const sin = Math.sin(radians);
-//     let transformation_matrix = [cos,sin,0,0,  -1*sin,cos,0,0,  0,0,1,0   ,0,0,0,1];
-//     return multiply(transformation_matrix, matrix);
-// }
-
-// function scale(matrix, x, y, z){
-//     let transformation_matrix = [x,0,0,0, 0,y,0,0, 0,0,z,0, 0,0,0,1];
-//     return multiply(transformation_matrix, matrix);
-// }
 
 let inverse = src => {
   let dst = [], det = 0, cofactor = (c, r) => {
@@ -343,16 +309,16 @@ function onStartFrame(t, state) {
 
     gl.uniform3fv(state.uCursorLoc, cursorValue());
 
-    gl.uniform1f(state.material_index, 1);
-    gl.uniform3fv(state.uMaterialsLoc[0].ambient , [.0,.0,.0]);
+    gl.uniform1f(state.material_index, 2);
+    gl.uniform3fv(state.uMaterialsLoc[0].ambient , [.1,.0,.0]);
     gl.uniform3fv(state.uMaterialsLoc[0].diffuse , [.7,.7,.7]);
     gl.uniform3fv(state.uMaterialsLoc[0].specular, [0.9,.9,.9]);
-    gl.uniform1f(state.uMaterialsLoc[0].power   , 6);
+    gl.uniform1f(state.uMaterialsLoc[0].power   , 12);
     gl.uniform1f(state.uMaterialsLoc[0].reflection_factor   , .2);
     gl.uniform1f(state.uMaterialsLoc[0].refraction_factor   , .2);
     gl.uniform1f(state.uMaterialsLoc[0].index_of_refrac   , 1.1);
 
-    gl.uniform3fv(state.uMaterialsLoc[1].ambient , [.0,.0,.0]);
+    gl.uniform3fv(state.uMaterialsLoc[1].ambient , [.0,.1,.1]);
     gl.uniform3fv(state.uMaterialsLoc[1].diffuse , [0.,.4,.0]);
     gl.uniform3fv(state.uMaterialsLoc[1].specular, [0.5,.5,.5]);
     gl.uniform1f(state.uMaterialsLoc[1].power   , 20);
@@ -360,7 +326,7 @@ function onStartFrame(t, state) {
     gl.uniform1f(state.uMaterialsLoc[1].refraction_factor   , .2);
     gl.uniform1f(state.uMaterialsLoc[1].index_of_refrac   , 1.8);
 
-    gl.uniform3fv(state.uMaterialsLoc[2].ambient , [.02,.0,.0]);
+    gl.uniform3fv(state.uMaterialsLoc[2].ambient , [.1,.0,.1]);
     gl.uniform3fv(state.uMaterialsLoc[2].diffuse , [0.2,.0,.0]);
     gl.uniform3fv(state.uMaterialsLoc[2].specular, [0.5,.5,.2]);
     gl.uniform1f(state.uMaterialsLoc[2].power   , 20);

@@ -12,8 +12,8 @@ struct Material {
 };
 
 const int NS = 3;
-Material uMaterials[NS];
-uniform float material_index;
+uniform Material uMaterials[NS];
+uniform int material_index;
 
 uniform vec3  uColor;
 uniform vec3  uCursor; // CURSOR: xy=pos, z=mouse up/down
@@ -42,18 +42,8 @@ void main() {
     	
     float fl = -5.;
     vec3 w = normal(vec3(vXY.x, vXY.y, fl));
-    uMaterials[0].specular = vec3(0.9,0.9,0.9);
-    uMaterials[0].power = 12.;
-    vec3 shade = vec3(.1,.0,.0);
-    shade = shade  + specular_light(lDir, 0, vPos, w, normal(vNor));
-   
-    // HIGHLIGHT CURSOR POSITION WHILE MOUSE IS PRESSED
-    // if (uCursor.z > 0. && min(abs(uCursor.x - vXY.x), abs(uCursor.y - vXY.y)) < .01)
-    //       color = vec3(1.,1.,1.);
-
-    
-    fragColor = vec4(sqrt(shade), 1.0);
-    // fragColor = vec4(sqrt(uMaterials[0].specular), 1.0);
+    vec3 color = uMaterials[material_index].ambient + specular_light(lDir, material_index, vPos, w, normal(vNor));
+    fragColor = vec4(sqrt(color), 1.0);
 }
 
 
