@@ -214,21 +214,21 @@ let identity = ()       => {
 };
 let rotateX = t         => {
 
-    const radians = t * (180 / Math.PI);
+    const radians = t * (Math.PI/180);
     const cos = Math.cos(radians);
     const sin = Math.sin(radians);
     let transformation_matrix = [1,0,0,0,  0,cos,sin,0,  0,-1*sin,cos,0   ,0,0,0,1];
     return transformation_matrix;
 };
 let rotateY = t         => {
-    const radians = t * (180 / Math.PI);
+    const radians = t * (Math.PI/180);
     const cos = Math.cos(radians);
     const sin = Math.sin(radians);
     let transformation_matrix = [cos,0,-1*sin,0,  0,1,0,0,  sin,0,cos,0,  0,0,0,1];
     return transformation_matrix;
 };
 let rotateZ = t         => {
-    const radians = t * (180 / Math.PI);
+    const radians = t * (Math.PI/180);
     const cos = Math.cos(radians);
     const sin = Math.sin(radians);
     let transformation_matrix = [cos,sin,0,0,  -1*sin,cos,0,0,  0,0,1,0   ,0,0,0,1];
@@ -355,44 +355,90 @@ function onDraw(t, projMat, viewMat, state, eyeIdx) {
 //                                                                    //
  //////////////////////////////////////////////////////////////////////
 
-    let theta = Math.sin(0.1 * state.time);
+    let theta = 100*state.time;
+    // console.log(theta);
     m.save();
     m.identity();
-    m.translate(0,0,-6);
-    m.rotateY(45);
-    // m.rotateZ(theta*0.1); 
-    m.rotateX(theta*0.1);
-    m.rotateZ(theta*0.2); 
-    // m.rotateY(theta*0.5); 
-    // m.scale(.3,1,.05);
-    // gl.uniform3fv(state.uColorLoc, state.color0 );
-    // gl.uniformMatrix4fv(state.uModelLoc, false, m.value() );
-    // gl.drawArrays(gl.TRIANGLES, 0, cubeVertices.length / VERTEX_SIZE);
-    for (let side = -1 ; side <= 1 ; side += 2) {
-       let theta = Math.sin(0.1 * state.time) * side;
-       m.save();
-          m.translate(side * .3,0,0);
-          m.rotateZ(theta);               // SHOULDER
-          m.rotateY(-side + .5 * theta);
-          m.translate(side * .3,0,0);
-          m.save();
-             m.scale(.3,.05,.05);
-             gl.uniform3fv(state.uColorLoc, state.color0 );
-             gl.uniformMatrix4fv(state.uModelLoc, false, m.value() );
-             gl.drawArrays(gl.TRIANGLES, 0, cubeVertices.length / VERTEX_SIZE);
-          m.restore();
+    m.translate(0,0,-3);
+    m.rotateX(theta);
+    m.rotateZ(theta);
 
-          m.translate(side * .3,0,0);
-          m.rotateZ(theta);              // ELBOW
-          m.translate(side * .3,0,0);
-          m.save();
-             m.scale(.3,.05,.05);
-             gl.uniform3fv(state.uColorLoc, state.color0 );
-             gl.uniformMatrix4fv(state.uModelLoc, false, m.value() );
-             gl.drawArrays(gl.TRIANGLES, 0, cubeVertices.length / VERTEX_SIZE);
-          m.restore();
-       m.restore();
+    //torso
+    m.save();
+      m.scale(0.15, 0.5, 0.1);
+      gl.uniform3fv(state.uColorLoc, state.color0 );
+      gl.uniformMatrix4fv(state.uModelLoc, false, m.value() );
+      gl.drawArrays(gl.TRIANGLES, 0, cubeVertices.length / VERTEX_SIZE);
+    m.restore();
+
+
+    //face
+    m.save();
+      m.translate(0, 0.6, 0)
+      m.scale(.09, .13, .01);
+      gl.uniform3fv(state.uColorLoc, state.color0 );
+      gl.uniformMatrix4fv(state.uModelLoc, false, m.value() );
+      gl.drawArrays(gl.TRIANGLES, 0, cubeVertices.length / VERTEX_SIZE);
+    m.restore();
+
+
+    //ears
+    m.save();
+      m.translate(0, 0.6, 0)
+      m.scale(.2, .01, .01);
+      gl.uniform3fv(state.uColorLoc, state.color0 );
+      gl.uniformMatrix4fv(state.uModelLoc, false, m.value() );
+      gl.drawArrays(gl.TRIANGLES, 0, cubeVertices.length / VERTEX_SIZE);
+    m.restore();
+    
+    //hands and legs
+    for(let limb = 0; limb <= 1; limb+=1){
+
+      //translate lower for legs
+      m.translate( 0, -0.52*limb, 0);
+      m.save();
+        for (let side = -1 ; side <= 1 ; side += 2) {
+         let theta = 100*state.time * side;
+         if(limb == 1){
+          theta = theta*0.3;
+         }
+         m.save();
+            m.translate(side * .18,0,0);
+            m.rotateZ(theta);               // SHOULDER
+            m.rotateY(-side + .5 * theta);
+            m.translate(side * .3,0,0);
+            m.save();
+               m.save();
+                 m.scale(.3,.05,.05);
+                 gl.uniform3fv(state.uColorLoc, state.color0 );
+                 gl.uniformMatrix4fv(state.uModelLoc, false, m.value() );
+                 gl.drawArrays(gl.TRIANGLES, 0, cubeVertices.length / VERTEX_SIZE);
+               m.restore();
+
+            m.restore();
+
+            //elbows and knees
+            m.translate(side * .3,0,0);
+            m.rotateZ(theta);              
+            m.translate(side * .3,0,0);
+            m.save();
+               m.scale(.3,.05,.05);
+               gl.uniform3fv(state.uColorLoc, state.color0 );
+               gl.uniformMatrix4fv(state.uModelLoc, false, m.value() );
+               gl.drawArrays(gl.TRIANGLES, 0, cubeVertices.length / VERTEX_SIZE);
+            m.restore();
+            m.save();
+                 m.translate(side*0.29, 0, 0);
+                 m.scale(.01,.1,.1);
+                 gl.uniform3fv(state.uColorLoc, state.color0 );
+                 gl.uniformMatrix4fv(state.uModelLoc, false, m.value() );
+                 gl.drawArrays(gl.TRIANGLES, 0, cubeVertices.length / VERTEX_SIZE);
+               m.restore();
+         m.restore();
+        }
+      m.restore();
     }
+    
 
     m.restore();
 }

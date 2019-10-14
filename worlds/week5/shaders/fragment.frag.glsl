@@ -13,7 +13,7 @@ struct Material {
 
 const int NS = 3;
 uniform Material uMaterials[NS];
-uniform int material_index;
+uniform float material_index;
 
 uniform vec3  uColor;
 uniform vec3  uCursor; // CURSOR: xy=pos, z=mouse up/down
