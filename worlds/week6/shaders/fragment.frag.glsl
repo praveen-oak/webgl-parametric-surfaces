@@ -31,6 +31,7 @@ vec3 normal(vec3 vector){
      return vec3(float(vector.x/length), float(vector.y/length), float(vector.z/length));
 }
 
+//phonh shading
 vec3 specular_light(vec3 lDir, int shape_index, vec3 surface, vec3 w, vec3 surface_normal){
     vec3 temp = 2.*dot(surface_normal, lDir)*surface_normal - lDir;
     float reflection_factor = max(0., pow(dot(-1.*w, temp), uMaterials[shape_index].power));
@@ -39,11 +40,7 @@ vec3 specular_light(vec3 lDir, int shape_index, vec3 surface, vec3 w, vec3 surfa
 
 void main() {
     vec3 lDir  = normalize(vec3(0.,1.,1.));
-    	
-    float fl = -5.;
-    vec3 w = normal(vec3(vXY.x, vXY.y, fl));
-    // vec3 temp = vec3(material_index, material_index, material_index);
-    // vec3 color = temp;
+    vec3 w = normal(vec3(vXY.x, vXY.y, -5.)); //-5 is focal length
     vec3 color = uMaterials[material_index].ambient + specular_light(lDir, material_index, vPos, w, normal(vNor));
     fragColor = vec4(sqrt(color), 1.0);
 }

@@ -2,7 +2,7 @@
 
 
 const VERTEX_SIZE = 6; // EACH VERTEX CONSISTS OF: x,y,z, ny,ny,nz
-
+let to_print = true;
 
  //////////////////////////////////////////////////////////////////
 //                                                                //
@@ -47,7 +47,46 @@ let createCubeVertices = () => {
    return v;
 }
 
+let createSphereVertices = () => {
+   let v = [];
+   let addVertex = a => {
+      for (let i = 0 ; i < a.length ; i++)
+         v.push(a[i]);
+   }
+
+   // EACH SQUARE CONSISTS OF TWO TRIANGLES.
+
+   let addSquare = (a,b,c,d) => {
+      addVertex(c);
+      addVertex(b);
+      addVertex(a);
+
+      addVertex(b);
+      addVertex(c);
+      addVertex(d);
+   }
+
+   // VERTEX DATA FOR TWO OPPOSING SQUARE FACES. EACH VERTEX CONSISTS OF: x,y,z, nx,ny,nz
+
+   let P = [[-1,-1,-1, 0,0,-1],[ 1,-1,-1, 0,0,-1],[-1, 1,-1, 0,0,-1],[ 1, 1,-1, 0,0,-1],
+            [-1,-1, 1, 0,0, 1],[ 1,-1, 1, 0,0, 1],[-1, 1, 1, 0,0, 1],[ 1, 1, 1, 0,0, 1]];
+
+   // LOOP THROUGH x,y,z. EACH TIME ADD TWO OPPOSING FACES, THEN PERMUTE COORDINATES.
+
+   for (let n = 0 ; n < 3 ; n++) {
+      addSquare(P[0],P[1],P[2],P[3]);
+      addSquare(P[4],P[5],P[6],P[7]);
+      for (let i = 0 ; i < P.length ; i++)
+         P[i] = [P[i][1],P[i][2],P[i][0], P[i][4],P[i][5],P[i][3]];
+   }
+
+   return v;
+}
+
 let cubeVertices = createCubeVertices();
+
+let sphereVertices = createSphereVertices();
+
 
 
 async function setup(state) {
@@ -345,6 +384,117 @@ function onStartFrame(t, state) {
     gl.enable(gl.DEPTH_TEST);
 }
 
+Array.prototype.extend = function (other_array) {
+    /* You should include a test to check whether other_array really is an array */
+    other_array.forEach(function(v) {this.push(v)}, this);
+}
+
+function createMesh(M, N, callback){
+  const col_values = M-1;
+  const row_values = N-1;
+
+  const col_addition = 1/col_values;
+  const row_addition = 1/row_values;
+
+  const total_triangles = 1+((2*M-1)*(N-1));
+
+  let index = 0
+  let u = 1;
+  let v = 0;
+  let is_v_high = false;
+  let is_u_decreasing = true;
+  let return_array = [];
+  // let m_index = 0
+  while(index < total_triangles){
+    return_array.extend(callback(u, v));
+    index = index + 1;
+    if(is_u_decreasing === true && round(u) === 0 && is_v_high === true){
+        is_u_decreasing = false;
+        v = v + row_addition;
+        u = 0;
+    }else if(is_u_decreasing === false && round(u) === 1 && is_v_high == true){
+      is_u_decreasing = true;
+      v = v + row_addition;
+      u = 1;
+    }else{
+      if(is_u_decreasing === true){
+        if(is_v_high === true){
+          v = v - row_addition;
+          u = u - col_addition;
+          is_v_high = false;
+        }else{
+          v = v + row_addition;
+          is_v_high = true;
+        }
+      }else{
+        if(is_v_high === true){
+          v = v - row_addition;
+          u = u + col_addition;
+          is_v_high = false;
+        }else{
+          v = v + row_addition;
+          is_v_high = true;
+        }
+      }
+    }
+  }
+  return return_array;
+
+}
+
+function round(value){
+  return Math.round(value * 100) / 100;
+}
+
+function uvToSphere(u,v){
+
+    let theta = 2*Math.PI*u;
+    let fi = Math.PI*v - Math.PI/2
+
+    let x = round(Math.cos(theta)*Math.cos(fi));
+    let y = round(Math.sin(theta)*Math.cos(fi));
+    let z = round(Math.sin(fi));
+    return [x,y,z, x,y,z]
+}
+
+function uvToTorus(u,v){
+    let r = 0.5;
+    let theta = 2*Math.PI*u;
+    let fi = 2*Math.PI*v;
+
+    let x = round(Math.cos(theta)*(1+ r*Math.cos(fi)));
+    let y = round(Math.sin(theta)*(1+ r*Math.cos(fi)));
+    let z = r*round(Math.sin(fi));
+    let nx = round(Math.cos(theta)*Math.cos(fi));
+    let ny = round(Math.sin(theta)*Math.cos(fi));
+    let nz = round(Math.sin(fi));
+    return [x,y,z, nx,ny,nz];
+}
+
+function uvToOpenTube(u, v){
+  let theta = 2*Math.PI*u;
+  let x = round(Math.cos(theta));
+  let y = round(Math.sin(theta));
+  let z = 2*v - 1;
+  return [x,y,z,x,y,0];
+
+}
+
+function uvToCappedCylinder(u, v){
+  let theta = 2*Math.PI*u;
+  let c = round(Math.cos(theta));
+  let s = round(Math.sin(theta));
+  let z = Math.max(-1, Math.min(1, 10*v - 5));
+  switch (Math.floor(5.001 * v)) {
+    case 0: case 5: return [ 0,0,z, 0,0,z ] // center of back/front end cap
+    case 1: case 4: return [ c,s,z, 0,0,z ] // perimeter of back/front end cap
+    case 2: case 3: return [ c,s,z, c,s,0 ] // back/front of cylindrical tube
+  }
+
+}
+
+
+
 function onDraw(t, projMat, viewMat, state, eyeIdx) {
 
     let m = state.m;
@@ -352,113 +502,33 @@ function onDraw(t, projMat, viewMat, state, eyeIdx) {
     gl.uniformMatrix4fv(state.uViewLoc, false, new Float32Array(viewMat));
     gl.uniformMatrix4fv(state.uProjLoc, false, new Float32Array(projMat));
 
-
- //////////////////////////////////////////////////////////////////////
-//                                                                    //
-//  THIS IS THE EXAMPLE OF TWO WAVING ARMS THAT WE CREATED IN CLASS.  //
-//  FOR HOMEWORK, YOU WILL WANT TO DO SOMETHING DIFFERENT.            //
-//                                                                    //
- //////////////////////////////////////////////////////////////////////
+    let drawShape = (color, type, vertices) => {
+       gl.uniform3fv(state.uColorLoc, color);
+       gl.uniformMatrix4fv(state.uModelLoc, false, m.value());
+       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+       gl.drawArrays(type, 0, vertices.length / VERTEX_SIZE);
+    }
 
     let theta = 100*state.time;
-    // console.log(theta);
-    m.save();
     m.identity();
-    m.translate(0,0,-3);
+    m.translate(-.6,.5,-4);
+    m.scale(.4,.4,.4);
+    // m.scale(1, 1, 5);
+    // m.rotateX(90);
+    m.scale(1, 1, 1);
     m.rotateX(theta);
-    m.rotateZ(theta);
-
-    //torso
-    m.save();
-      m.scale(0.15, 0.5, 0.1);
-      gl.uniform1i(state.material_index, 1);
-      gl.uniform3fv(state.uColorLoc, state.color0 );
-      gl.uniformMatrix4fv(state.uModelLoc, false, m.value() );
-      gl.drawArrays(gl.TRIANGLES, 0, cubeVertices.length / VERTEX_SIZE);
-    m.restore();
-
+    // m.rotateX(theta);
+    // let array = createMesh(5, 3, uvToSphere);
+    // if(to_print === true){
+    //   to_print = false;
+    //   for(let i = 0; i< array.length / VERTEX_SIZE; i++){
+    //     console.log( i + " "+array.slice(i*VERTEX_SIZE, (i+1)*VERTEX_SIZE));
+    //   }
+    // }
     gl.uniform1i(state.material_index, 0);
-
-    //face
-    m.save();
-      m.translate(0, 0.6, 0)
-      m.scale(.09, .13, .01);
-
-      gl.uniform3fv(state.uColorLoc, state.color0 );
-      gl.uniformMatrix4fv(state.uModelLoc, false, m.value() );
-      gl.drawArrays(gl.TRIANGLES, 0, cubeVertices.length / VERTEX_SIZE);
-    m.restore();
-
-
-    //ears
-    m.save();
-      m.translate(0, 0.6, 0)
-      m.scale(.2, .01, .01);
-      gl.uniform3fv(state.uColorLoc, state.color0 );
-      gl.uniformMatrix4fv(state.uModelLoc, false, m.value() );
-      gl.drawArrays(gl.TRIANGLES, 0, cubeVertices.length / VERTEX_SIZE);
-    m.restore();
-    
-    //hands and legs
-    for(let limb = 0; limb <= 1; limb+=1){
-
-      //translate lower for legs
-      m.translate( 0, -0.52*limb, 0);
-      m.save();
-        for (let side = -1 ; side <= 1 ; side += 2) {
-         let theta = 100*state.time * side;
-         if(limb == 1){
-          theta = theta*0.3;
-         }
-         m.save();
-            m.translate(side * .18,0,0);
-            m.rotateZ(theta);               // SHOULDER
-            m.rotateY(-side + .5 * theta);
-            m.translate(side * .3,0,0);
-            m.save();
-               m.save();
-                 m.scale(.3,.05,.05);
-                 gl.uniform3fv(state.uColorLoc, state.color0 );
-                 gl.uniformMatrix4fv(state.uModelLoc, false, m.value() );
-                 //half sleeve shirt
-                 if(limb == 0){
-                  gl.uniform1i(state.material_index, 1); 
-                 }else{
-                  //shorts
-                  gl.uniform1i(state.material_index, 2); 
-                 }
-                 
-                 gl.drawArrays(gl.TRIANGLES, 0, cubeVertices.length / VERTEX_SIZE);
-                 gl.uniform1i(state.material_index, 0);
-               m.restore();
-
-            m.restore();
-
-            //elbows and knees
-            m.translate(side * .3,0,0);
-            m.rotateZ(theta);              
-            m.translate(side * .3,0,0);
-            m.save();
-               m.scale(.3,.05,.05);
-               gl.uniform3fv(state.uColorLoc, state.color0 );
-               gl.uniformMatrix4fv(state.uModelLoc, false, m.value() );
-               gl.drawArrays(gl.TRIANGLES, 0, cubeVertices.length / VERTEX_SIZE);
-            m.restore();
-            m.save();
-                 m.translate(side*0.29, 0, 0);
-                 m.scale(.01,.1,.1);
-                 gl.uniform3fv(state.uColorLoc, state.color0 );
-                 gl.uniformMatrix4fv(state.uModelLoc, false, m.value() );
-                 gl.drawArrays(gl.TRIANGLES, 0, cubeVertices.length / VERTEX_SIZE);
-               m.restore();
-         m.restore();
-        }
-      m.restore();
-    }
-    
-
-    m.restore();
+    drawShape([1,1,0], gl.TRIANGLE_STRIP, createMesh(30, 30, uvToSphere));
 }
+
 
 function onEndFrame(t, state) {
 }
