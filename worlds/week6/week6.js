@@ -443,7 +443,7 @@ function createMesh(M, N, callback){
 }
 
 function round(value){
-  return Math.round(value * 100) / 100;
+  return Math.round(value * 10000) / 10000;
 }
 
 function uvToSphere(u,v){
@@ -509,24 +509,64 @@ function onDraw(t, projMat, viewMat, state, eyeIdx) {
        gl.drawArrays(type, 0, vertices.length / VERTEX_SIZE);
     }
 
-    let theta = 100*state.time;
+    let theta = (45*Math.cos(state.time)-270)*Math.PI/180;
+    // let theta = state.time;
+    let ball_radius = 0.6;
+    let spike_radius = 0.08;
     m.identity();
-    m.translate(-.6,.5,-4);
-    m.scale(.4,.4,.4);
-    // m.scale(1, 1, 5);
-    // m.rotateX(90);
-    m.scale(1, 1, 1);
-    m.rotateX(theta);
-    // m.rotateX(theta);
-    // let array = createMesh(5, 3, uvToSphere);
-    // if(to_print === true){
-    //   to_print = false;
-    //   for(let i = 0; i< array.length / VERTEX_SIZE; i++){
-    //     console.log( i + " "+array.slice(i*VERTEX_SIZE, (i+1)*VERTEX_SIZE));
-    //   }
-    // }
-    gl.uniform1i(state.material_index, 0);
-    drawShape([1,1,0], gl.TRIANGLE_STRIP, createMesh(30, 30, uvToSphere));
+    // m.translate(Math.sin(theta), 0, 0);
+    m.translate(0,0,-6);
+    m.translate(0, 2, 0);
+
+    let i = 0;
+    m.save();
+      m.scale(2, 0.5, 0.5);
+      drawShape([1,1,0], gl.TRIANGLES, cubeVertices);
+    m.restore();
+    m.save()
+       
+        m.scale(0.02, 0.05, 0.02);
+        for(let y = 0; y <= 40; y = y + 2){
+          m.save();
+          m.translate(y*Math.cos(theta), -y*Math.sin(theta), 0);
+          drawShape([1,1,0], gl.TRIANGLE_STRIP, createMesh(50, 50, uvToTorus));
+          m.restore();
+        }
+
+    m.restore();
+    m.translate(0, -1, 0);
+    m.translate(1*Math.cos(theta), -1.4*Math.sin(theta), 0);
+    m.scale(ball_radius, ball_radius, ball_radius);
+    
+    drawShape([1,1,0], gl.TRIANGLE_STRIP, createMesh(50, 50, uvToSphere));
+    
+    
+    gl.uniform1i(state.material_index, 1);
+    
+    for(let fi = -90; fi <= 90; fi = fi+45){
+      for(let i = 0; i < 360; i = i + 30){
+        m.save();
+          let dist = 2*ball_radius-3*spike_radius;
+          let x = dist*Math.cos(i*Math.PI/180)*Math.cos(fi*Math.PI/180);
+          let y = dist*Math.sin(i*Math.PI/180)*Math.cos(fi*Math.PI/180);
+          let z = dist*round(Math.sin(fi*Math.PI/180));
+          m.translate(x, y, z);
+          m.scale(spike_radius, spike_radius, spike_radius);
+          m.rotateY(45);
+          m.rotateZ(45);
+          gl.uniform1i(state.material_index, 1);
+          drawShape([1,1,0], gl.TRIANGLES, cubeVertices);
+        m.restore();
+      }
+    }
+
+
+    
+    
+    // gl.uniform1i(state.material_index, 1);
+    
+    // m.rotateZ(45);
+    
 }
 
 
