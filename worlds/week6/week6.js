@@ -352,7 +352,7 @@ function onStartFrame(t, state) {
     gl.uniform1i(state.material_index, 1);
 
     //skin
-    gl.uniform3fv(state.uMaterialsLoc[0].ambient , [.3,.25,.05]);
+    gl.uniform3fv(state.uMaterialsLoc[0].ambient , [.05,.05,.05]);
     gl.uniform3fv(state.uMaterialsLoc[0].diffuse , [.7,.7,.7]);
     gl.uniform3fv(state.uMaterialsLoc[0].specular, [0.9,.9,.9]);
     gl.uniform1f(state.uMaterialsLoc[0].power   , 12);
@@ -369,8 +369,8 @@ function onStartFrame(t, state) {
     gl.uniform1f(state.uMaterialsLoc[1].refraction_factor   , .2);
     gl.uniform1f(state.uMaterialsLoc[1].index_of_refrac   , 1.8);
 
-    //shorts
-    gl.uniform3fv(state.uMaterialsLoc[2].ambient , [.128,.0,.0]);
+    //wall
+    gl.uniform3fv(state.uMaterialsLoc[2].ambient , [.2,.2,.2]);
     gl.uniform3fv(state.uMaterialsLoc[2].diffuse , [0.2,.0,.0]);
     gl.uniform3fv(state.uMaterialsLoc[2].specular, [0.5,.5,.2]);
     gl.uniform1f(state.uMaterialsLoc[2].power   , 20);
@@ -509,7 +509,7 @@ function onDraw(t, projMat, viewMat, state, eyeIdx) {
        gl.drawArrays(type, 0, vertices.length / VERTEX_SIZE);
     }
 
-    let theta = (45*Math.cos(state.time)-270)*Math.PI/180;
+    let theta = (60*Math.cos(2*state.time)-270)*Math.PI/180;
     // let theta = state.time;
     let ball_radius = 0.6;
     let spike_radius = 0.08;
@@ -520,15 +520,19 @@ function onDraw(t, projMat, viewMat, state, eyeIdx) {
 
     let i = 0;
     m.save();
+      //wall
       m.scale(2, 0.5, 0.5);
+      gl.uniform1i(state.material_index, 2);
       drawShape([1,1,0], gl.TRIANGLES, cubeVertices);
     m.restore();
+    
     m.save()
        
         m.scale(0.02, 0.05, 0.02);
         for(let y = 0; y <= 40; y = y + 2){
           m.save();
           m.translate(y*Math.cos(theta), -y*Math.sin(theta), 0);
+          gl.uniform1i(state.material_index, 0);
           drawShape([1,1,0], gl.TRIANGLE_STRIP, createMesh(50, 50, uvToTorus));
           m.restore();
         }
@@ -537,7 +541,7 @@ function onDraw(t, projMat, viewMat, state, eyeIdx) {
     m.translate(0, -1, 0);
     m.translate(1*Math.cos(theta), -1.4*Math.sin(theta), 0);
     m.scale(ball_radius, ball_radius, ball_radius);
-    
+    gl.uniform1i(state.material_index, 1);
     drawShape([1,1,0], gl.TRIANGLE_STRIP, createMesh(50, 50, uvToSphere));
     
     
